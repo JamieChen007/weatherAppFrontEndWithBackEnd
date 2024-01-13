@@ -1,7 +1,14 @@
+const dotenv = require('dotenv');
+
 const fetchData = async (cityName, forecastCity, lon, lat) => {
-  //Todo get from .env
-  const apiKey = '03abd712da0a89a7087ac86600829290';
-  const apiUrl = 'https://api.openweathermap.org/data/2.5/';
+  if (process.env.NODE_ENV === 'development') {
+    dotenv.config({ path: '.env.development' });
+  } else {
+    dotenv.config();
+  }
+  const apiUrl = process.env.APIURL;
+  const apiKey = process.env.APIKEY;
+
   let url;
   if (cityName) {
     url = `${apiUrl}weather?q=${cityName}&appid=${apiKey}&units=metric`;

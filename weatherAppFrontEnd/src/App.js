@@ -3,22 +3,17 @@ import WeatherCard from './components/WeatherCard';
 import bg from './assets/bg.png';
 import { useEffect, useState } from 'react';
 import TipsModal from './components/UI/TipsModal/';
-import { fetchData } from './apis/fetchData';
 import { formatForecastData } from './apis/helper/formatForecastData';
-import { getSingleCityData } from './apis/helper/getSingleCityData';
+
+const CITY_LIST = ['sydney', 'melbourne', 'shanghai', 'guangzhou', 'brisbane'];
 
 function App() {
+  const apiUrl = process.env.REACT_APP_APIURL;
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [weatherDataList, setWeatherDataList] = useState([]);
   const [forecastData, setForecastData] = useState([]);
-  const [citiesList, setCitiesList] = useState([
-    'sydney',
-    'melbourne',
-    'shanghai',
-    'guangzhou',
-    'brisbane',
-  ]);
+  const [citiesList, setCitiesList] = useState(CITY_LIST);
 
   useEffect(() => {
     const fetchAllAndSetState = async () => {
@@ -26,18 +21,17 @@ function App() {
         if (citiesList.length > 0) {
           const citiesListData = await Promise.all(
             citiesList.map(async (city) => {
-              // const singleCityData = await getSingleCityData(city);
               const singleCityData = await fetch(
-                `http://localhost:3001/api/v1/getSingleCityData/?cityName=${city}`
+                `${apiUrl}/getSingleCityData/?cityName=${city}`
               ).then((res) => res.json());
               return singleCityData;
             })
           );
           setWeatherDataList(citiesListData);
-          // const forecastFetchResult = await fetchData(null, citiesList[0]);
           const forecastFetchResult = await fetch(
-            `http://localhost:3001/api/v1/getForecastData/?cityName=${citiesList[0]}`
+            `${apiUrl}/getForecastData/?cityName=${citiesList[0]}`
           ).then((res) => res.json());
+
           const forecastData = formatForecastData(forecastFetchResult);
           setForecastData(forecastData);
           setIsLoading(false);
@@ -47,20 +41,14 @@ function App() {
       }
     };
     fetchAllAndSetState();
-  }, [citiesList]);
+  }, [citiesList, apiUrl]);
 
   const getSearchCity = async (value) => {
-    // const result = await fetchData(value);
-    const result = await fetch(`http://localhost:3001/api/v1/getSingleCityData/?cityName=${value}`);
-    // console.log('result', result);
+    const result = await fetch(`${apiUrl}/getSingleCityData/?cityName=${value}`);
     if (result.status !== 200) {
       setIsError(true);
       return;
     }
-    // if (!result) {
-    //   setIsError(true);
-    //   return;
-    // }
 
     const newCitiesList = [...citiesList];
     newCitiesList.pop();
